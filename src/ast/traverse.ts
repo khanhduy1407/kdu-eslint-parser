@@ -16,6 +16,7 @@ const KEYS = Evk.unionWith({
     VIdentifier: [],
     VLiteral: [],
     VOnExpression: ["body"],
+    VSlotScopeExpression: ["id"],
     VStartTag: ["attributes"],
     VText: [],
 })
@@ -57,13 +58,14 @@ function getFallbackKeys(node: Node): string[] {
  * @param parent The parent node.
  * @param generator The event generator.
  */
-function traverse(node: Node, parent: Node | null, visitor: Visitor) {
+function traverse(node: Node, parent: Node | null, visitor: Visitor): void {
     let i = 0
     let j = 0
 
     visitor.enterNode(node, parent)
 
-    const keys = (visitor.visitorKeys || KEYS)[node.type] || getFallbackKeys(node)
+    const keys =
+        (visitor.visitorKeys || KEYS)[node.type] || getFallbackKeys(node)
     for (i = 0; i < keys.length; ++i) {
         const child = (node as any)[keys[i]]
 
@@ -73,8 +75,7 @@ function traverse(node: Node, parent: Node | null, visitor: Visitor) {
                     traverse(child[j], node, visitor)
                 }
             }
-        }
-        else if (child) {
+        } else if (child) {
             traverse(child, node, visitor)
         }
     }
@@ -97,7 +98,7 @@ export interface Visitor {
  * @param node Root node to traverse.
  * @param visitor Visitor.
  */
-export function traverseNodes(node: Node, visitor: Visitor) {
+export function traverseNodes(node: Node, visitor: Visitor): void {
     traverse(node, null, visitor)
 }
 

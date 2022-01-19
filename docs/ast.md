@@ -104,14 +104,21 @@ interface VOnExpression <: Expression {
     type: "VOnExpression"
     body: [ Statement ]
 }
+
+interface VSlotScopeExpression <: Expression {
+  type: "VSlotScopeExpression"
+  id: Pattern
+}
 ```
 
 - This is mustaches or directive values.
 - If syntax errors exist, `VExpressionContainer#expression` is `null`.
+- If it's an empty mustache, `VExpressionContainer#expression` is `null`. (e.g., `{{ /* a comment */ }}`)
 - `Reference` is objects but not `Node`. Those are external references which are in the expression.
 - `Reference#variable` is the variable which is defined by a `VElement`. If a reference uses a global variable or a member of VM, this is `null`.
 - `VForExpression` is an expression node like [ForInStatement] but it has an array as `left` property and does not have `body` property. This is the value of [`v-for` directives].
-- `VOnExpression` is an expression node like [BlockStatement] but it does not have braces. This is the value of [`v-on` directives].
+- `VOnExpression` is an expression node like [BlockStatement] but it does not have braces. This is the value of [`v-on` directives] only if the `v-on` directive doesn't have that argument.
+- `VSlotScopeExpression` is an expression node like [VariableDeclarator]. This is the value of [`slot-scope` attribute] or the `scope` attribute of `<template>` elements.
 
 > Note: `kdu-eslint-parser` transforms `v-for="(x, i) in list"` to `for(let [x, i] in list);` then gives the configured parser (`espree` by default) it. This implies that it needs the capability to parse ES2015 destructuring in order to parse [`v-for` directives].
 
@@ -163,6 +170,7 @@ interface VDirective <: Node {
 ```
 
 - If their attribute value does not exist, the `value` property is `null`.
+- The `slot-scope` attribute becomes `directive:true` specially.
 
 ## VStartTag
 
@@ -248,7 +256,9 @@ This supports only HTML for now. However, I'm going to add other languages Kdu.j
 [Pattern]: https://github.com/estree/estree/blob/master/es5.md#patterns
 [Identifier]: https://github.com/estree/estree/blob/master/es5.md#identifier
 [ForInStatement]: https://github.com/estree/estree/blob/master/es5.md#forinstatement
+[VariableDeclarator]: https://github.com/estree/estree/blob/master/es5.md#variabledeclarator
 
 [`v-for` directives]: #
 [`v-on` directives]: #
 [scope]: #
+[`slot-scope` attribute]: #

@@ -1,6 +1,13 @@
 import assert from "assert"
 import last from "lodash/last"
-import { ErrorCode, HasLocation, Namespace, ParseError, Token, VAttribute } from "../ast"
+import {
+    ErrorCode,
+    HasLocation,
+    Namespace,
+    ParseError,
+    Token,
+    VAttribute,
+} from "../ast"
 import { debug } from "../common/debug"
 import { Tokenizer, TokenizerState, TokenType } from "./tokenizer"
 
@@ -74,44 +81,47 @@ export class IntermediateTokenizer {
     /**
      * The source code text.
      */
-    get text(): string {
+    public get text(): string {
         return this.tokenizer.text
     }
 
     /**
      * The parse errors.
      */
-    get errors(): ParseError[] {
+    public get errors(): ParseError[] {
         return this.tokenizer.errors
     }
 
     /**
      * The current state.
      */
-    get state(): TokenizerState {
+    public get state(): TokenizerState {
         return this.tokenizer.state
     }
-    set state(value: TokenizerState) { //eslint-disable-line require-jsdoc
+    //eslint-disable-next-line require-jsdoc
+    public set state(value: TokenizerState) {
         this.tokenizer.state = value
     }
 
     /**
      * The current namespace.
      */
-    get namespace(): Namespace {
+    public get namespace(): Namespace {
         return this.tokenizer.namespace
     }
-    set namespace(value: Namespace) { //eslint-disable-line require-jsdoc
+    //eslint-disable-next-line require-jsdoc
+    public set namespace(value: Namespace) {
         this.tokenizer.namespace = value
     }
 
     /**
      * The current flag of expression enabled.
      */
-    get expressionEnabled(): boolean {
+    public get expressionEnabled(): boolean {
         return this.tokenizer.expressionEnabled
     }
-    set expressionEnabled(value: boolean) { //eslint-disable-line require-jsdoc
+    //eslint-disable-next-line require-jsdoc
+    public set expressionEnabled(value: boolean) {
         this.tokenizer.expressionEnabled = value
     }
 
@@ -119,7 +129,7 @@ export class IntermediateTokenizer {
      * Initialize this intermediate tokenizer.
      * @param tokenizer The tokenizer.
      */
-    constructor(tokenizer: Tokenizer) {
+    public constructor(tokenizer: Tokenizer) {
         this.tokenizer = tokenizer
         this.currentToken = null
         this.attribute = null
@@ -134,7 +144,7 @@ export class IntermediateTokenizer {
      * Get the next intermediate token.
      * @returns The intermediate token or null.
      */
-    nextToken(): IntermediateToken | null {
+    public nextToken(): IntermediateToken | null {
         let token: Token | null = null
         let result: IntermediateToken | null = null
 
@@ -175,13 +185,11 @@ export class IntermediateTokenizer {
                     loc: { start: start.loc.start, end: end.loc.end },
                     value,
                 }
-            }
-            else if (token.type === "Text") {
+            } else if (token.type === "Text") {
                 token.range[1] = end.range[1]
                 token.loc.end = end.loc.end
                 token.value += value
-            }
-            else {
+            } else {
                 throw new Error("unreachable")
             }
         }
@@ -194,7 +202,12 @@ export class IntermediateTokenizer {
      * @param code The error code.
      */
     private reportParseError(token: HasLocation, code: ErrorCode): void {
-        const error = ParseError.fromCode(code, token.range[0], token.loc.start.line, token.loc.start.column)
+        const error = ParseError.fromCode(
+            code,
+            token.range[0],
+            token.loc.start.line,
+            token.loc.start.column,
+        )
         this.errors.push(error)
 
         debug("[html] syntax error:", error.message)
@@ -224,17 +237,20 @@ export class IntermediateTokenizer {
 
         if (this.expressionStartToken != null) {
             // Defer this token until a VExpressionEnd token or a non-text token appear.
-            const lastToken = last(this.expressionTokens) || this.expressionStartToken
+            const lastToken =
+                last(this.expressionTokens) || this.expressionStartToken
             if (lastToken.range[1] === token.range[0]) {
                 this.expressionTokens.push(token)
                 return null
             }
 
             result = this.commit()
-        }
-        else if (this.currentToken != null) {
+        } else if (this.currentToken != null) {
             // Concatenate this token to the current text token.
-            if (this.currentToken.type === "Text" && this.currentToken.range[1] === token.range[0]) {
+            if (
+                this.currentToken.type === "Text" &&
+                this.currentToken.range[1] === token.range[0]
+            ) {
                 this.currentToken.value += token.value
                 this.currentToken.range[1] = token.range[1]
                 this.currentToken.loc.end = token.loc.end
@@ -266,7 +282,10 @@ export class IntermediateTokenizer {
             this.attribute.range[1] = token.range[1]
             this.attribute.loc.end = token.loc.end
 
-            if (this.currentToken == null || this.currentToken.type !== "StartTag") {
+            if (
+                this.currentToken == null ||
+                this.currentToken.type !== "StartTag"
+            ) {
                 throw new Error("unreachable")
             }
             this.currentToken.range[1] = token.range[1]
@@ -330,7 +349,11 @@ export class IntermediateTokenizer {
     protected HTMLIdentifier(token: Token): IntermediateToken | null {
         this.tokens.push(token)
 
-        if (this.currentToken == null || this.currentToken.type === "Text" || this.currentToken.type === "Mustache") {
+        if (
+            this.currentToken == null ||
+            this.currentToken.type === "Text" ||
+            this.currentToken.type === "Mustache"
+        ) {
             throw new Error("unreachable")
         }
         if (this.currentToken.type === "EndTag") {
@@ -385,7 +408,10 @@ export class IntermediateTokenizer {
                 value: token.value,
             }
 
-            if (this.currentToken == null || this.currentToken.type !== "StartTag") {
+            if (
+                this.currentToken == null ||
+                this.currentToken.type !== "StartTag"
+            ) {
                 throw new Error("unreachable")
             }
             this.currentToken.range[1] = token.range[1]
@@ -424,8 +450,7 @@ export class IntermediateTokenizer {
 
         if (this.currentToken.type === "StartTag") {
             this.currentToken.selfClosing = true
-        }
-        else {
+        } else {
             this.reportParseError(token, "end-tag-with-trailing-solidus")
         }
 
@@ -504,7 +529,9 @@ export class IntermediateTokenizer {
         if (this.expressionStartToken != null) {
             return this.processText(token)
         }
-        const separated = (this.currentToken != null && this.currentToken.range[1] !== token.range[0])
+        const separated =
+            this.currentToken != null &&
+            this.currentToken.range[1] !== token.range[0]
         const result = separated ? this.commit() : null
 
         this.tokens.push(token)
@@ -525,6 +552,15 @@ export class IntermediateTokenizer {
         const start = this.expressionStartToken
         const end = last(this.expressionTokens) || start
 
+        // If it's '{{}}', it's handled as a text.
+        if (token.range[0] === start.range[1]) {
+            this.tokens.pop()
+            this.expressionStartToken = null
+            const result = this.processText(start)
+            this.processText(token)
+            return result
+        }
+
         // If invalid notation `</>` exists directly before this token, separate it.
         if (end.range[1] !== token.range[0]) {
             const result = this.commit()
@@ -539,7 +575,7 @@ export class IntermediateTokenizer {
         this.expressionTokens = []
 
         // Create token.
-        const result = (this.currentToken != null) ? this.commit() : null
+        const result = this.currentToken != null ? this.commit() : null
         this.currentToken = {
             type: "Mustache",
             range: [start.range[0], token.range[1]],

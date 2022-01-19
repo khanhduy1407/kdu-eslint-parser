@@ -17,7 +17,12 @@ export interface HasParent {
 /**
  * The union type for all nodes.
  */
-export type Node = ESLintNode | VNode | VForExpression | VOnExpression
+export type Node =
+    | ESLintNode
+    | VNode
+    | VForExpression
+    | VOnExpression
+    | VSlotScopeExpression
 
 //------------------------------------------------------------------------------
 // Script
@@ -27,12 +32,25 @@ export type Node = ESLintNode | VNode | VForExpression | VOnExpression
  * The union type for ESLint nodes.
  */
 export type ESLintNode =
-    ESLintIdentifier | ESLintLiteral | ESLintProgram | ESLintSwitchCase |
-    ESLintCatchClause | ESLintVariableDeclarator | ESLintStatement |
-    ESLintExpression | ESLintProperty | ESLintAssignmentProperty | ESLintSuper |
-    ESLintTemplateElement | ESLintSpreadElement | ESLintPattern |
-    ESLintClassBody | ESLintMethodDefinition | ESLintModuleDeclaration |
-    ESLintModuleSpecifier | ESLintLegacyRestProperty
+    | ESLintIdentifier
+    | ESLintLiteral
+    | ESLintProgram
+    | ESLintSwitchCase
+    | ESLintCatchClause
+    | ESLintVariableDeclarator
+    | ESLintStatement
+    | ESLintExpression
+    | ESLintProperty
+    | ESLintAssignmentProperty
+    | ESLintSuper
+    | ESLintTemplateElement
+    | ESLintSpreadElement
+    | ESLintPattern
+    | ESLintClassBody
+    | ESLintMethodDefinition
+    | ESLintModuleDeclaration
+    | ESLintModuleSpecifier
+    | ESLintLegacyRestProperty
 
 /**
  * The parsing result of ESLint custom parsers.
@@ -55,13 +73,25 @@ export interface ESLintProgram extends HasLocation, HasParent {
 }
 
 export type ESLintStatement =
-    ESLintExpressionStatement | ESLintBlockStatement | ESLintEmptyStatement |
-    ESLintDebuggerStatement | ESLintWithStatement | ESLintReturnStatement |
-    ESLintLabeledStatement | ESLintBreakStatement | ESLintContinueStatement |
-    ESLintIfStatement | ESLintSwitchStatement | ESLintThrowStatement |
-    ESLintTryStatement | ESLintWhileStatement | ESLintDoWhileStatement |
-    ESLintForStatement | ESLintForInStatement | ESLintForOfStatement |
-    ESLintDeclaration
+    | ESLintExpressionStatement
+    | ESLintBlockStatement
+    | ESLintEmptyStatement
+    | ESLintDebuggerStatement
+    | ESLintWithStatement
+    | ESLintReturnStatement
+    | ESLintLabeledStatement
+    | ESLintBreakStatement
+    | ESLintContinueStatement
+    | ESLintIfStatement
+    | ESLintSwitchStatement
+    | ESLintThrowStatement
+    | ESLintTryStatement
+    | ESLintWhileStatement
+    | ESLintDoWhileStatement
+    | ESLintForStatement
+    | ESLintForInStatement
+    | ESLintForOfStatement
+    | ESLintDeclaration
 
 export interface ESLintEmptyStatement extends HasLocation, HasParent {
     type: "EmptyStatement"
@@ -180,8 +210,9 @@ export interface ESLintDebuggerStatement extends HasLocation, HasParent {
 }
 
 export type ESLintDeclaration =
-    ESLintFunctionDeclaration | ESLintVariableDeclaration |
-    ESLintClassDeclaration
+    | ESLintFunctionDeclaration
+    | ESLintVariableDeclaration
+    | ESLintClassDeclaration
 
 export interface ESLintFunctionDeclaration extends HasLocation, HasParent {
     type: "FunctionDeclaration"
@@ -226,19 +257,23 @@ export interface ESLintMethodDefinition extends HasLocation, HasParent {
 }
 
 export type ESLintModuleDeclaration =
-    ESLintImportDeclaration | ESLintExportNamedDeclaration |
-    ESLintExportDefaultDeclaration | ESLintExportAllDeclaration
+    | ESLintImportDeclaration
+    | ESLintExportNamedDeclaration
+    | ESLintExportDefaultDeclaration
+    | ESLintExportAllDeclaration
 
 export type ESLintModuleSpecifier =
-    ESLintImportSpecifier | ESLintImportDefaultSpecifier |
-    ESLintImportNamespaceSpecifier | ESLintExportSpecifier
+    | ESLintImportSpecifier
+    | ESLintImportDefaultSpecifier
+    | ESLintImportNamespaceSpecifier
+    | ESLintExportSpecifier
 
 export interface ESLintImportDeclaration extends HasLocation, HasParent {
     type: "ImportDeclaration"
     specifiers: (
-        ESLintImportSpecifier | ESLintImportDefaultSpecifier |
-        ESLintImportNamespaceSpecifier
-    )[]
+        | ESLintImportSpecifier
+        | ESLintImportDefaultSpecifier
+        | ESLintImportNamespaceSpecifier)[]
     source: ESLintLiteral
 }
 
@@ -281,16 +316,29 @@ export interface ESLintExportAllDeclaration extends HasLocation, HasParent {
 }
 
 export type ESLintExpression =
-    ESLintThisExpression | ESLintArrayExpression | ESLintObjectExpression |
-    ESLintFunctionExpression | ESLintArrowFunctionExpression |
-    ESLintYieldExpression | ESLintLiteral | ESLintUnaryExpression |
-    ESLintUpdateExpression | ESLintBinaryExpression |
-    ESLintAssignmentExpression | ESLintLogicalExpression |
-    ESLintMemberExpression | ESLintConditionalExpression |
-    ESLintCallExpression | ESLintNewExpression | ESLintSequenceExpression |
-    ESLintTemplateLiteral | ESLintTaggedTemplateExpression |
-    ESLintClassExpression | ESLintMetaProperty | ESLintIdentifier |
-    ESLintAwaitExpression
+    | ESLintThisExpression
+    | ESLintArrayExpression
+    | ESLintObjectExpression
+    | ESLintFunctionExpression
+    | ESLintArrowFunctionExpression
+    | ESLintYieldExpression
+    | ESLintLiteral
+    | ESLintUnaryExpression
+    | ESLintUpdateExpression
+    | ESLintBinaryExpression
+    | ESLintAssignmentExpression
+    | ESLintLogicalExpression
+    | ESLintMemberExpression
+    | ESLintConditionalExpression
+    | ESLintCallExpression
+    | ESLintNewExpression
+    | ESLintSequenceExpression
+    | ESLintTemplateLiteral
+    | ESLintTaggedTemplateExpression
+    | ESLintClassExpression
+    | ESLintMetaProperty
+    | ESLintIdentifier
+    | ESLintAwaitExpression
 
 export interface ESLintIdentifier extends HasLocation, HasParent {
     type: "Identifier"
@@ -317,7 +365,10 @@ export interface ESLintArrayExpression extends HasLocation, HasParent {
 
 export interface ESLintObjectExpression extends HasLocation, HasParent {
     type: "ObjectExpression"
-    properties: (ESLintProperty | ESLintSpreadElement | ESLintLegacySpreadProperty)[]
+    properties: (
+        | ESLintProperty
+        | ESLintSpreadElement
+        | ESLintLegacySpreadProperty)[]
 }
 
 export interface ESLintProperty extends HasLocation, HasParent {
@@ -363,9 +414,28 @@ export interface ESLintUnaryExpression extends HasLocation, HasParent {
 export interface ESLintBinaryExpression extends HasLocation, HasParent {
     type: "BinaryExpression"
     operator:
-        "==" | "!=" | "===" | "!==" | "<" | "<=" | ">" | ">=" | "<<" |
-        ">>" | ">>>" | "+" | "-" | "*" | "/" | "%" | "**" | "|" | "^" | "&" |
-        "in" | "instanceof"
+        | "=="
+        | "!="
+        | "==="
+        | "!=="
+        | "<"
+        | "<="
+        | ">"
+        | ">="
+        | "<<"
+        | ">>"
+        | ">>>"
+        | "+"
+        | "-"
+        | "*"
+        | "/"
+        | "%"
+        | "**"
+        | "|"
+        | "^"
+        | "&"
+        | "in"
+        | "instanceof"
     left: ESLintExpression
     right: ESLintExpression
 }
@@ -373,8 +443,19 @@ export interface ESLintBinaryExpression extends HasLocation, HasParent {
 export interface ESLintAssignmentExpression extends HasLocation, HasParent {
     type: "AssignmentExpression"
     operator:
-        "=" | "+=" | "-=" | "*=" | "/=" | "%=" | "**=" | "<<=" | ">>=" |
-        ">>>=" | "|=" | "^=" | "&="
+        | "="
+        | "+="
+        | "-="
+        | "*="
+        | "/="
+        | "%="
+        | "**="
+        | "<<="
+        | ">>="
+        | ">>>="
+        | "|="
+        | "^="
+        | "&="
     left: ESLintPattern
     right: ESLintExpression
 }
@@ -469,13 +550,20 @@ export interface ESLintMetaProperty extends HasLocation, HasParent {
 }
 
 export type ESLintPattern =
-    ESLintIdentifier | ESLintObjectPattern | ESLintArrayPattern |
-    ESLintRestElement | ESLintAssignmentPattern | ESLintMemberExpression |
-    ESLintLegacyRestProperty
+    | ESLintIdentifier
+    | ESLintObjectPattern
+    | ESLintArrayPattern
+    | ESLintRestElement
+    | ESLintAssignmentPattern
+    | ESLintMemberExpression
+    | ESLintLegacyRestProperty
 
 export interface ESLintObjectPattern extends HasLocation, HasParent {
     type: "ObjectPattern"
-    properties: (ESLintAssignmentProperty | ESLintRestElement | ESLintLegacyRestProperty)[]
+    properties: (
+        | ESLintAssignmentProperty
+        | ESLintRestElement
+        | ESLintLegacyRestProperty)[]
 }
 
 export interface ESLintAssignmentProperty extends ESLintProperty {
@@ -542,8 +630,12 @@ export const NS = Object.freeze({
  * Type of namespaces.
  */
 export type Namespace =
-    typeof NS.HTML | typeof NS.MathML | typeof NS.SVG | typeof NS.XLink |
-    typeof NS.XML | typeof NS.XMLNS
+    | typeof NS.HTML
+    | typeof NS.MathML
+    | typeof NS.SVG
+    | typeof NS.XLink
+    | typeof NS.XML
+    | typeof NS.XMLNS
 
 /**
  * Type of variable definitions.
@@ -583,20 +675,29 @@ export interface VOnExpression extends HasLocation, HasParent {
 }
 
 /**
+ * The node of `slot-scope` directives.
+ */
+export interface VSlotScopeExpression extends HasLocation, HasParent {
+    type: "VSlotScopeExpression"
+    parent: VExpressionContainer
+    id: ESLintPattern
+}
+
+/**
  * The union type of any nodes.
  */
 export type VNode =
-    VAttribute |
-    VDirective |
-    VDirectiveKey |
-    VDocumentFragment |
-    VElement |
-    VEndTag |
-    VExpressionContainer |
-    VIdentifier |
-    VLiteral |
-    VStartTag |
-    VText
+    | VAttribute
+    | VDirective
+    | VDirectiveKey
+    | VDocumentFragment
+    | VElement
+    | VEndTag
+    | VExpressionContainer
+    | VIdentifier
+    | VLiteral
+    | VStartTag
+    | VText
 
 /**
  * Text nodes.
@@ -614,7 +715,12 @@ export interface VText extends HasLocation, HasParent {
 export interface VExpressionContainer extends HasLocation, HasParent {
     type: "VExpressionContainer"
     parent: VDocumentFragment | VElement | VDirective
-    expression: ESLintExpression | VForExpression | VOnExpression | null
+    expression:
+        | ESLintExpression
+        | VForExpression
+        | VOnExpression
+        | VSlotScopeExpression
+        | null
     references: Reference[]
 }
 
@@ -637,7 +743,10 @@ export interface DirectiveKeyParts {
 /**
  * Attribute name nodes.
  */
-export interface VDirectiveKey extends HasLocation, HasParent, DirectiveKeyParts {
+export interface VDirectiveKey
+    extends HasLocation,
+        HasParent,
+        DirectiveKeyParts {
     type: "VDirectiveKey"
     parent: VAttribute
     shorthand: boolean
@@ -720,7 +829,10 @@ export interface VElement extends HasLocation, HasParent {
 /**
  * Root nodes.
  */
-export interface VDocumentFragment extends HasLocation, HasParent, HasConcreteInfo {
+export interface VDocumentFragment
+    extends HasLocation,
+        HasParent,
+        HasConcreteInfo {
     type: "VDocumentFragment"
     parent: null
     children: (VElement | VText | VExpressionContainer)[]

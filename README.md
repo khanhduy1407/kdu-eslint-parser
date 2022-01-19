@@ -46,14 +46,15 @@ For example:
         "ecmaFeatures": {
             "globalReturn": false,
             "impliedStrict": false,
-            "jsx": false,
-            "experimentalObjectRestSpread": false
+            "jsx": false
         }
     }
 }
 ```
 
-Also, you can use `parser` property to specify a custom parser to parse `<script>` tags.
+### parserOptions.parser
+
+You can use `parserOptions.parser` property to specify a custom parser to parse `<script>` tags.
 Other properties than parser would be given to the specified parser.
 For example:
 
@@ -77,8 +78,11 @@ For example:
 }
 ```
 
-- If you use with `babel-eslint`, it has additional requirements. Use `eslint@>=4.14.0` and `babel-eslint@>=8.1.1`.
+- If you use with `babel-eslint`, use `babel-eslint@>=8.1.1`.
 - If you use `typescript-eslint-parser`, the location of original nodes can be wrong. Waiting for `typescript-eslint-parser` to support [parseResult.visitorKeys](https://eslint.org/docs/developer-guide/working-with-plugins#working-with-custom-parsers).
+
+If the `parserOptions.parser` is `false`, the `kdu-eslint-parser` skips parsing `<script>` tags completely.
+This is useful for people who use the language ESLint community doesn't provide custom parser implementation.
 
 ## 🎇 Usage for custom rules / plugins
 

@@ -1,13 +1,45 @@
 import assert from "assert"
 import last from "lodash/last"
 import findLastIndex from "lodash/findLastIndex"
-import { ErrorCode, HasLocation, Namespace, NS, ParseError, Token, VAttribute, VDocumentFragment, VElement, VExpressionContainer } from "../ast"
+import {
+    ErrorCode,
+    HasLocation,
+    Namespace,
+    NS,
+    ParseError,
+    Token,
+    VAttribute,
+    VDocumentFragment,
+    VElement,
+    VExpressionContainer,
+} from "../ast"
 import { debug } from "../common/debug"
 import { LocationCalculator } from "../common/location-calculator"
-import { convertToDirective, defineScopeAttributeVariable, processMustache, resolveReferences } from "../template"
-import { MATHML_ATTRIBUTE_NAME_MAP, SVG_ATTRIBUTE_NAME_MAP } from "./util/attribute-names"
-import { HTML_CAN_BE_LEFT_OPEN_TAGS, HTML_NON_FHRASING_TAGS, HTML_RAWTEXT_TAGS, HTML_RCDATA_TAGS, HTML_VOID_ELEMENT_TAGS, SVG_ELEMENT_NAME_MAP } from "./util/tag-names"
-import { IntermediateToken, IntermediateTokenizer, EndTag, Mustache, StartTag, Text } from "./intermediate-tokenizer"
+import {
+    convertToDirective,
+    processMustache,
+    resolveReferences,
+} from "../template"
+import {
+    MATHML_ATTRIBUTE_NAME_MAP,
+    SVG_ATTRIBUTE_NAME_MAP,
+} from "./util/attribute-names"
+import {
+    HTML_CAN_BE_LEFT_OPEN_TAGS,
+    HTML_NON_FHRASING_TAGS,
+    HTML_RAWTEXT_TAGS,
+    HTML_RCDATA_TAGS,
+    HTML_VOID_ELEMENT_TAGS,
+    SVG_ELEMENT_NAME_MAP,
+} from "./util/tag-names"
+import {
+    IntermediateToken,
+    IntermediateTokenizer,
+    EndTag,
+    Mustache,
+    StartTag,
+    Text,
+} from "./intermediate-tokenizer"
 import { Tokenizer } from "./tokenizer"
 
 const DIRECTIVE_NAME = /^(?:v-|[:@]).*[^.:@]$/
@@ -23,7 +55,13 @@ const DUMMY_PARENT: any = Object.freeze({})
 function isMathMLIntegrationPoint(element: VElement): boolean {
     if (element.namespace === NS.MathML) {
         const name = element.name
-        return name === "mi" || name === "mo" || name === "mn" || name === "ms" || name === "mtext"
+        return (
+            name === "mi" ||
+            name === "mo" ||
+            name === "mn" ||
+            name === "ms" ||
+            name === "mtext"
+        )
     }
     return false
 }
@@ -38,14 +76,13 @@ function isHTMLIntegrationPoint(element: VElement): boolean {
     if (element.namespace === NS.MathML) {
         return (
             element.name === "annotation-xml" &&
-            element.startTag.attributes.some(a =>
-                a.directive === false &&
-                a.key.name === "encoding" &&
-                a.value != null &&
-                (
-                    a.value.value === "text/html" ||
-                    a.value.value === "application/xhtml+xml"
-                )
+            element.startTag.attributes.some(
+                a =>
+                    a.directive === false &&
+                    a.key.name === "encoding" &&
+                    a.value != null &&
+                    (a.value.value === "text/html" ||
+                        a.value.value === "application/xhtml+xml"),
             )
         )
     }
@@ -91,7 +128,8 @@ function adjustAttributeName(name: string, namespace: Namespace): string {
  * @param node The node to commit the end location.
  */
 function propagateEndLocation(node: VDocumentFragment | VElement): void {
-    const lastChild = (node.type === "VElement" ? node.endTag : null) || last(node.children)
+    const lastChild =
+        (node.type === "VElement" ? node.endTag : null) || last(node.children)
     if (lastChild != null) {
         node.range[1] = lastChild.range[1]
         node.loc.end = lastChild.loc.end
@@ -143,17 +181,21 @@ export class Parser {
     private get namespace(): Namespace {
         return this.tokenizer.namespace
     }
-    private set namespace(value: Namespace) { //eslint-disable-line require-jsdoc
+    //eslint-disable-next-line require-jsdoc
+    private set namespace(value: Namespace) {
         this.tokenizer.namespace = value
     }
 
     /**
      * The current flag of expression enabled.
      */
+    // @ts-ignore
+    //eslint-disable-next-line require-jsdoc
     private get expressionEnabled(): boolean {
         return this.tokenizer.expressionEnabled
     }
-    private set expressionEnabled(value: boolean) { //eslint-disable-line require-jsdoc
+    //eslint-disable-next-line require-jsdoc
+    private set expressionEnabled(value: boolean) {
         this.tokenizer.expressionEnabled = value
     }
 
@@ -169,9 +211,12 @@ export class Parser {
      * @param tokenizer The tokenizer to parse.
      * @param parserOptions The parser options to parse inline expressions.
      */
-    constructor(tokenizer: Tokenizer, parserOptions: any) {
+    public constructor(tokenizer: Tokenizer, parserOptions: any) {
         this.tokenizer = new IntermediateTokenizer(tokenizer)
-        this.locationCalculator = new LocationCalculator(tokenizer.gaps, tokenizer.lineTerminators)
+        this.locationCalculator = new LocationCalculator(
+            tokenizer.gaps,
+            tokenizer.lineTerminators,
+        )
         this.parserOptions = parserOptions
         this.document = {
             type: "VDocumentFragment",
@@ -193,10 +238,10 @@ export class Parser {
      * Parse the HTML which was given in this constructor.
      * @returns The result of parsing.
      */
-    parse(): VDocumentFragment {
+    public parse(): VDocumentFragment {
         let token: IntermediateToken | null = null
         while ((token = this.tokenizer.nextToken()) != null) {
-            (this as any)[token.type](token)
+            ;(this as any)[token.type](token)
         }
 
         this.popElementStackUntil(0)
@@ -210,7 +255,12 @@ export class Parser {
      * @param code The error code.
      */
     private reportParseError(token: HasLocation, code: ErrorCode): void {
-        const error = ParseError.fromCode(code, token.range[0], token.loc.start.line, token.loc.start.column)
+        const error = ParseError.fromCode(
+            code,
+            token.range[0],
+            token.loc.start.line,
+            token.loc.start.column,
+        )
         this.errors.push(error)
 
         debug("[html] syntax error:", error.message)
@@ -227,7 +277,8 @@ export class Parser {
 
         // Update the current namespace.
         const current = this.currentNode
-        this.namespace = (current.type === "VElement") ? current.namespace : NS.HTML
+        this.namespace =
+            current.type === "VElement" ? current.namespace : NS.HTML
 
         // Update expression flag.
         if (this.elementStack.length === 0) {
@@ -247,19 +298,30 @@ export class Parser {
 
     /**
      * Detect the namespace of the new element.
-     * @param name The value of a HTMLTagOpen token.
+     * @param token The StartTag token to detect.
      * @returns The namespace of the new element.
      */
-    private detectNamespace(name: string): Namespace {
+    //eslint-disable-next-line complexity, require-jsdoc
+    private detectNamespace(token: StartTag): Namespace {
+        const name = token.name
         let ns = this.namespace
 
         if (ns === NS.MathML || ns === NS.SVG) {
             const element = this.currentNode
             if (element.type === "VElement") {
-                if (element.namespace === NS.MathML && element.name === "annotation-xml" && name === "svg") {
+                if (
+                    element.namespace === NS.MathML &&
+                    element.name === "annotation-xml" &&
+                    name === "svg"
+                ) {
                     return NS.SVG
                 }
-                if (isHTMLIntegrationPoint(element) || (isMathMLIntegrationPoint(element) && name !== "mglyph" && name !== "malignmark")) {
+                if (
+                    isHTMLIntegrationPoint(element) ||
+                    (isMathMLIntegrationPoint(element) &&
+                        name !== "mglyph" &&
+                        name !== "malignmark")
+                ) {
                     ns = NS.HTML
                 }
             }
@@ -271,6 +333,15 @@ export class Parser {
             }
             if (name === "math") {
                 return NS.MathML
+            }
+        }
+
+        if (name === "template") {
+            const xmlns = token.attributes.find(a => a.key.name === "xmlns")
+            const value = xmlns && xmlns.value && xmlns.value.value
+
+            if (value === NS.HTML || value === NS.MathML || value === NS.SVG) {
+                return value
             }
         }
 
@@ -304,21 +375,32 @@ export class Parser {
      * @param namespace The current namespace.
      */
     private processAttribute(node: VAttribute, namespace: Namespace): void {
-        if (DIRECTIVE_NAME.test(node.key.name)) {
-            convertToDirective(this.text, this.parserOptions, this.locationCalculator, node)
+        const tagName = node.parent.parent.name
+        const attrName = node.key.name
+
+        if (
+            DIRECTIVE_NAME.test(attrName) ||
+            attrName === "slot-scope" ||
+            (tagName === "template" && attrName === "scope")
+        ) {
+            convertToDirective(
+                this.text,
+                this.parserOptions,
+                this.locationCalculator,
+                node,
+            )
             return
         }
 
-        const key = node.key.name = adjustAttributeName(node.key.name, namespace)
+        const key = (node.key.name = adjustAttributeName(
+            node.key.name,
+            namespace,
+        ))
         const value = node.value && node.value.value
 
-        if (key === "scope" && node.parent.parent.name === "template") {
-            defineScopeAttributeVariable(this.text, this.parserOptions, this.locationCalculator, node)
-        }
-        else if (key === "xmlns" && value !== namespace) {
+        if (key === "xmlns" && value !== namespace) {
             this.reportParseError(node, "x-invalid-namespace")
-        }
-        else if (key === "xmlns:xlink" && value !== NS.XLink) {
+        } else if (key === "xmlns:xlink" && value !== NS.XLink) {
             this.reportParseError(node, "x-invalid-namespace")
         }
     }
@@ -327,13 +409,14 @@ export class Parser {
      * Handle the start tag token.
      * @param token The token to handle.
      */
+    //eslint-disable-next-line complexity, require-jsdoc
     protected StartTag(token: StartTag): void {
         debug("[html] StartTag %j", token)
 
         this.closeCurrentElementIfNecessary(token.name)
 
         const parent = this.currentNode
-        const namespace = this.detectNamespace(token.name)
+        const namespace = this.detectNamespace(token)
         const element: VElement = {
             type: "VElement",
             range: [token.range[0], token.range[1]],
@@ -371,9 +454,13 @@ export class Parser {
         }
 
         // Check whether the self-closing is valid.
-        const isVoid = (namespace === NS.HTML && HTML_VOID_ELEMENT_TAGS.has(element.name))
+        const isVoid =
+            namespace === NS.HTML && HTML_VOID_ELEMENT_TAGS.has(element.name)
         if (token.selfClosing && !isVoid && namespace === NS.HTML) {
-            this.reportParseError(token, "non-void-html-element-start-tag-with-trailing-solidus")
+            this.reportParseError(
+                token,
+                "non-void-html-element-start-tag-with-trailing-solidus",
+            )
         }
 
         // Kdu.js supports self-closing elements even if it's not one of void elements.
@@ -387,9 +474,16 @@ export class Parser {
 
         // Update the content type of this element.
         if (namespace === NS.HTML) {
-            if (element.name === "template" && element.parent.type === "VDocumentFragment") {
-                const langAttr = element.startTag.attributes.find(a => !a.directive && a.key.name === "lang") as (VAttribute | undefined)
-                const lang = (langAttr && langAttr.value && langAttr.value.value) || "html"
+            if (
+                element.name === "template" &&
+                element.parent.type === "VDocumentFragment"
+            ) {
+                const langAttr = element.startTag.attributes.find(
+                    a => !a.directive && a.key.name === "lang",
+                ) as VAttribute | undefined
+                const lang =
+                    (langAttr && langAttr.value && langAttr.value.value) ||
+                    "html"
 
                 if (lang !== "html") {
                     this.tokenizer.state = "RAWTEXT"
@@ -412,8 +506,9 @@ export class Parser {
     protected EndTag(token: EndTag): void {
         debug("[html] EndTag %j", token)
 
-        const i = findLastIndex(this.elementStack, (el) =>
-            el.name.toLowerCase() === token.name
+        const i = findLastIndex(
+            this.elementStack,
+            el => el.name.toLowerCase() === token.name,
         )
         if (i === -1) {
             this.reportParseError(token, "x-invalid-end-tag")
@@ -464,7 +559,12 @@ export class Parser {
             expression: null,
             references: [],
         }
-        processMustache(this.parserOptions, this.locationCalculator, container, token)
+        processMustache(
+            this.parserOptions,
+            this.locationCalculator,
+            container,
+            token,
+        )
 
         // Set relationship.
         parent.children.push(container)

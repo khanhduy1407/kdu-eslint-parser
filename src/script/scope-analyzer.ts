@@ -1,5 +1,11 @@
 import escope, * as escopeTypes from "eslint-scope"
-import { ESLintIdentifier, ESLintProgram, Reference, Variable, getFallbackKeys } from "../ast"
+import {
+    ESLintIdentifier,
+    ESLintProgram,
+    Reference,
+    Variable,
+    getFallbackKeys,
+} from "../ast"
 
 /**
  * Check whether the given reference is unique in the belonging array.
@@ -7,8 +13,23 @@ import { ESLintIdentifier, ESLintProgram, Reference, Variable, getFallbackKeys }
  * @param index The index of the reference.
  * @param references The belonging array of the reference.
  */
-function isUnique(reference: escopeTypes.Reference, index: number, references: escopeTypes.Reference[]): boolean {
-    return (index === 0) || (reference.identifier !== references[index - 1].identifier)
+function isUnique(
+    reference: escopeTypes.Reference,
+    index: number,
+    references: escopeTypes.Reference[],
+): boolean {
+    return (
+        index === 0 || reference.identifier !== references[index - 1].identifier
+    )
+}
+
+/**
+ * Check whether a given variable has that definition.
+ * @param variable The variable to check.
+ * @returns `true` if the variable has that definition.
+ */
+function hasDefinition(variable: escopeTypes.Variable): boolean {
+    return variable.defs.length >= 1
 }
 
 /**
@@ -19,11 +40,11 @@ function isUnique(reference: escopeTypes.Reference, index: number, references: e
 function transformReference(reference: escopeTypes.Reference): Reference {
     const ret: Reference = {
         id: reference.identifier as ESLintIdentifier,
-        mode: (
-            reference.isReadOnly() ? "r" :
-            reference.isWriteOnly() ? "w" :
-            /* otherwise */ "rw"
-        ),
+        mode: reference.isReadOnly()
+            ? "r"
+            : reference.isWriteOnly()
+                ? "w"
+                : /* otherwise */ "rw",
         variable: null,
     }
     Object.defineProperty(ret, "variable", { enumerable: false })
@@ -39,7 +60,7 @@ function transformReference(reference: escopeTypes.Reference): Reference {
 function transformVariable(variable: escopeTypes.Variable): Variable {
     const ret: Variable = {
         id: variable.defs[0].name as ESLintIdentifier,
-        kind: "v-for",
+        kind: variable.scope.type === "for" ? "v-for" : "scope",
         references: [],
     }
     Object.defineProperty(ret, "references", { enumerable: false })
@@ -53,10 +74,8 @@ function transformVariable(variable: escopeTypes.Variable): Variable {
  * @returns The `for` statement scope.
  */
 function getForScope(scope: escopeTypes.Scope): escopeTypes.Scope {
-    if (scope.childScopes[0].type === "module") {
-        scope = scope.childScopes[0]
-    }
-    return scope.childScopes[0]
+    const child = scope.childScopes[0]
+    return child.block === scope.block ? child.childScopes[0] : child
 }
 
 /**
@@ -85,7 +104,10 @@ function analyze(ast: ESLintProgram, parserOptions: any): escopeTypes.Scope {
  * @param {ASTNode} ast The root node to analyze.
  * @returns {Reference[]} The reference objects of external references.
  */
-export function analyzeExternalReferences(ast: ESLintProgram, parserOptions: any): Reference[] {
+export function analyzeExternalReferences(
+    ast: ESLintProgram,
+    parserOptions: any,
+): Reference[] {
     const scope = analyze(ast, parserOptions)
     return scope.through.filter(isUnique).map(transformReference)
 }
@@ -95,10 +117,15 @@ export function analyzeExternalReferences(ast: ESLintProgram, parserOptions: any
  * @param {ASTNode} ast The root node to analyze.
  * @returns {Reference[]} The reference objects of external references.
  */
-export function analyzeVariablesAndExternalReferences(ast: ESLintProgram, parserOptions: any): {variables: Variable[], references: Reference[]} {
+export function analyzeVariablesAndExternalReferences(
+    ast: ESLintProgram,
+    parserOptions: any,
+): { variables: Variable[]; references: Reference[] } {
     const scope = analyze(ast, parserOptions)
     return {
-        variables: getForScope(scope).variables.map(transformVariable),
+        variables: getForScope(scope)
+            .variables.filter(hasDefinition)
+            .map(transformVariable),
         references: scope.through.filter(isUnique).map(transformReference),
     }
 }
