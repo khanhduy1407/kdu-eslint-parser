@@ -23,6 +23,8 @@ export type Node =
     | VForExpression
     | VOnExpression
     | VSlotScopeExpression
+    | VFilterSequenceExpression
+    | VFilter
 
 //------------------------------------------------------------------------------
 // Script
@@ -684,6 +686,26 @@ export interface VSlotScopeExpression extends HasLocation, HasParent {
 }
 
 /**
+ * The node of a filter sequence which is separated by `|`.
+ */
+export interface VFilterSequenceExpression extends HasLocation, HasParent {
+    type: "VFilterSequenceExpression"
+    parent: VExpressionContainer
+    expression: ESLintExpression
+    filters: VFilter[]
+}
+
+/**
+ * The node of a filter sequence which is separated by `|`.
+ */
+export interface VFilter extends HasLocation, HasParent {
+    type: "VFilter"
+    parent: VFilterSequenceExpression
+    callee: ESLintIdentifier
+    arguments: (ESLintExpression | ESLintSpreadElement)[]
+}
+
+/**
  * The union type of any nodes.
  */
 export type VNode =
@@ -717,6 +739,7 @@ export interface VExpressionContainer extends HasLocation, HasParent {
     parent: VDocumentFragment | VElement | VDirective
     expression:
         | ESLintExpression
+        | VFilterSequenceExpression
         | VForExpression
         | VOnExpression
         | VSlotScopeExpression

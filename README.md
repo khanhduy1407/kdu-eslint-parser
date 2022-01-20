@@ -12,7 +12,10 @@ This parser allows us to lint the `<template>` of `.kdu` files. We can make mist
 $ npm install --save-dev eslint kdu-eslint-parser
 ```
 
-- `kdu-eslint-parser` requires ESLint 3.9.0 or later.
+- Requires Node.js 6.5.0 or later.
+- Requires ESLint 5.0.0 or later.
+- Requires `babel-eslint` 8.1.1 or later if you want it. (optional)
+- Requires `typescript-eslint-parser` 21.0.0 or later if you want it. (optional)
 
 ## 📖 Usage
 
